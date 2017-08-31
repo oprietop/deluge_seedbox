@@ -1,0 +1,38 @@
+version: '2.1'
+services:
+  nginx:
+    image: smashwilson/lets-nginx
+    depends_on:
+      - deluge
+    restart: always
+    environment:
+      TZ: /usr/share/zoneinfo/Europe/Madrid
+      EMAIL: $EMAIL
+      DOMAIN: $DOMAIN
+      UPSTREAM: deluge:8112
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/tuning/limits.conf:/etc/security/limits.conf:ro
+      - ./nginx/tuning/sysctl.conf:/etc/sysctl.conf:ro
+      - ./nginx/letsencrypt:/etc/letsencrypt
+      - ./nginx/ssl:/etc/ssl
+      - ./nginx/templates:/templates
+      - ./nginx/htpasswd:/etc/nginx/htpasswd:ro
+      - ./data:/usr/share/nginx/html
+  deluge:
+    image: linuxserver/deluge
+    restart: always
+    environment:
+      TZ: /usr/share/zoneinfo/Europe/Madrid
+      PUID: 0
+      PGID: 0
+    ports:
+      - 55555:55555
+    volumes:
+      - ./data/downloads:/downloads
+      - ./data/completed:/completed
+      - ./data/copy:/copy
+      - ./data/autoadd:/autoadd
+      - ./deluge:/config
